@@ -5,15 +5,20 @@ using CombatGame.Data;
 namespace CombatGame.Combat
 {
     /// <summary>
-    /// Resolves a single AttackData: waits the signal delay, shows the signal,
-    /// opens the input window, and determines Perfect/Good/Miss.
+    /// Resolves a single AttackData: plays the attacker's animation, waits the signal delay,
+    /// shows the signal, opens the input window, determines Perfect/Good/Miss,
+    /// and plays the defender's reaction animation.
     /// </summary>
     public class AttackResolver : MonoBehaviour
     {
         public SignalUI signalUI;
 
-        public IEnumerator ResolveSimple(AttackData attack, bool listenForAttackButton, System.Action<HitResult> onResult)
+        public IEnumerator ResolveSimple(AttackData attack, bool listenForAttackButton,
+            CharacterAnimationController attacker, CharacterAnimationController defender,
+            System.Action<HitResult> onResult)
         {
+            attacker.PlayAttack(attack.animationTrigger);
+
             yield return new WaitForSeconds(attack.signalDelay);
 
             signalUI.Show(SignalType.Simple);
@@ -39,7 +44,6 @@ namespace CombatGame.Combat
             while (elapsed < attack.inputWindow)
             {
                 elapsed += Time.deltaTime;
-                // 1 = full time left, 0 = window closed
                 signalUI.SetFill(1f - (elapsed / attack.inputWindow));
                 yield return null;
             }
@@ -53,18 +57,22 @@ namespace CombatGame.Combat
             }
 
             signalUI.Hide();
+            PlayDefenderReaction(defender, listenForAttackButton, attack, result);
             onResult?.Invoke(result);
         }
 
-        public IEnumerator ResolveCharged(AttackData attack, bool listenForAttackButton, System.Action<HitResult> onResult)
+        public IEnumerator ResolveCharged(AttackData attack, bool listenForAttackButton,
+            CharacterAnimationController attacker, CharacterAnimationController defender,
+            System.Action<HitResult> onResult)
         {
+            attacker.PlayAttack(attack.animationTrigger);
+
             yield return new WaitForSeconds(attack.signalDelay);
 
             signalUI.Show(SignalType.Charged);
 
             bool isHeld() => listenForAttackButton ? CombatInput.Instance.AttackHeld : CombatInput.Instance.BlockHeld;
 
-            // Grace period to start holding
             float graceElapsed = 0f;
             while (!isHeld() && graceElapsed < attack.inputWindow)
             {
@@ -76,17 +84,23 @@ namespace CombatGame.Combat
             if (!isHeld())
             {
                 signalUI.Hide();
+                PlayDefenderReaction(defender, listenForAttackButton, attack, HitResult.Miss);
                 onResult?.Invoke(HitResult.Miss);
                 yield break;
             }
 
-            // Now show hold progress filling up (0 -> 1) instead of counting down
+            // Only the Hero holds a physical "block pose" - enemies don't block, so only
+            // set IsBlockHolding when the defender is reacting on the Block button.
+            if (!listenForAttackButton) defender.SetBlockHolding(true);
+
             float heldElapsed = 0f;
             while (heldElapsed < attack.holdDuration)
             {
                 if (!isHeld())
                 {
+                    if (!listenForAttackButton) defender.SetBlockHolding(false);
                     signalUI.Hide();
+                    PlayDefenderReaction(defender, listenForAttackButton, attack, HitResult.Miss);
                     onResult?.Invoke(HitResult.Miss);
                     yield break;
                 }
@@ -95,8 +109,30 @@ namespace CombatGame.Combat
                 yield return null;
             }
 
+            if (!listenForAttackButton) defender.SetBlockHolding(false);
             signalUI.Hide();
             onResult?.Invoke(HitResult.Good);
+        }
+
+        /// <summary>
+        /// Plays the defender's reaction animation based on who attacked and the result.
+        /// - Enemy attacks, Hero defends: Perfect/Good -> Block (parry), Miss -> Hurt.
+        /// - Hero attacks, Enemy defends: Perfect/Good -> Hurt (hit landed), Miss -> nothing (attack whiffed).
+        /// </summary>
+        private void PlayDefenderReaction(CharacterAnimationController defender, bool attackerIsHero, AttackData attack, HitResult result)
+        {
+            if (attackerIsHero)
+            {
+                // Enemy is defending against Hero's attack
+                if (result != HitResult.Miss) defender.PlayHurt();
+                // Miss: attack whiffed, enemy stays in Idle, no reaction needed
+            }
+            else
+            {
+                // Hero is defending against Enemy's attack
+                if (result == HitResult.Miss) defender.PlayHurt();
+                else defender.PlayBlock();
+            }
         }
     }
 }

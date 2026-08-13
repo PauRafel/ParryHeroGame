@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: NewAttackData
   m_EditorClassIdentifier: Assembly-CSharp::CombatGame.Data.AttackData
   signalType: 0
-  signalDelay: 0.5
+  signalDelay: 0.6
   inputWindow: 0.4
   perfectWindow: 0.1
   holdDuration: 1
   damageOnFail: 1
-  animationTrigger: 
+  animationTrigger: Attack1
