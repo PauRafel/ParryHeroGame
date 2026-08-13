@@ -5,32 +5,30 @@ using CombatGame.Data;
 namespace CombatGame.Combat
 {
     /// <summary>
-    /// Resolves a single AttackData: waits the signal delay, "shows" the signal,
+    /// Resolves a single AttackData: waits the signal delay, shows the signal,
     /// opens the input window, and determines Perfect/Good/Miss.
-    /// Works the same whether the owner is Enemy (player must Block) or Hero (player must Attack) -
-    /// the caller decides which button to listen to.
     /// </summary>
     public class AttackResolver : MonoBehaviour
     {
+        public SignalUI signalUI;
+
         public IEnumerator ResolveSimple(AttackData attack, bool listenForAttackButton, System.Action<HitResult> onResult)
         {
-            // Wind-up delay before the signal appears
             yield return new WaitForSeconds(attack.signalDelay);
 
-            Debug.Log($"[Signal] SIMPLE appeared - window {attack.inputWindow}s");
+            signalUI.Show(SignalType.Simple);
 
             float elapsed = 0f;
             HitResult result = HitResult.Miss;
             bool pressedDuringWindow = false;
             float pressTime = -1f;
 
-            // Perfect window is centered inside the input window
             float perfectStart = (attack.inputWindow - attack.perfectWindow) / 2f;
             float perfectEnd = perfectStart + attack.perfectWindow;
 
             void HandlePress()
             {
-                if (pressedDuringWindow) return; // ignore extra presses
+                if (pressedDuringWindow) return;
                 pressedDuringWindow = true;
                 pressTime = elapsed;
             }
@@ -41,6 +39,8 @@ namespace CombatGame.Combat
             while (elapsed < attack.inputWindow)
             {
                 elapsed += Time.deltaTime;
+                // 1 = full time left, 0 = window closed
+                signalUI.SetFill(1f - (elapsed / attack.inputWindow));
                 yield return null;
             }
 
@@ -52,7 +52,7 @@ namespace CombatGame.Combat
                 result = (pressTime >= perfectStart && pressTime <= perfectEnd) ? HitResult.Perfect : HitResult.Good;
             }
 
-            Debug.Log($"[Result] SIMPLE -> {result}");
+            signalUI.Hide();
             onResult?.Invoke(result);
         }
 
@@ -60,40 +60,42 @@ namespace CombatGame.Combat
         {
             yield return new WaitForSeconds(attack.signalDelay);
 
-            Debug.Log($"[Signal] CHARGED appeared - must hold for {attack.holdDuration}s");
+            signalUI.Show(SignalType.Charged);
 
             bool isHeld() => listenForAttackButton ? CombatInput.Instance.AttackHeld : CombatInput.Instance.BlockHeld;
 
-            // Grace period to start pressing (reuse inputWindow as "time allowed to start holding")
+            // Grace period to start holding
             float graceElapsed = 0f;
             while (!isHeld() && graceElapsed < attack.inputWindow)
             {
                 graceElapsed += Time.deltaTime;
+                signalUI.SetFill(1f - (graceElapsed / attack.inputWindow));
                 yield return null;
             }
 
             if (!isHeld())
             {
-                Debug.Log("[Result] CHARGED -> Miss (never pressed)");
+                signalUI.Hide();
                 onResult?.Invoke(HitResult.Miss);
                 yield break;
             }
 
-            // Must keep holding for the full duration
+            // Now show hold progress filling up (0 -> 1) instead of counting down
             float heldElapsed = 0f;
             while (heldElapsed < attack.holdDuration)
             {
                 if (!isHeld())
                 {
-                    Debug.Log("[Result] CHARGED -> Miss (released early)");
+                    signalUI.Hide();
                     onResult?.Invoke(HitResult.Miss);
                     yield break;
                 }
                 heldElapsed += Time.deltaTime;
+                signalUI.SetFill(heldElapsed / attack.holdDuration);
                 yield return null;
             }
 
-            Debug.Log("[Result] CHARGED -> Good");
+            signalUI.Hide();
             onResult?.Invoke(HitResult.Good);
         }
     }

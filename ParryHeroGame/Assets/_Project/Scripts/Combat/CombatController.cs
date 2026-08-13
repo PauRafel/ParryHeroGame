@@ -14,12 +14,7 @@ namespace CombatGame.Combat
         [SerializeField] private int heroHealth;
         [SerializeField] private int enemyHealth;
 
-        private AttackResolver resolver;
-
-        private void Awake()
-        {
-            resolver = gameObject.AddComponent<AttackResolver>();
-        }
+        public AttackResolver resolver;
 
         private void Start()
         {
