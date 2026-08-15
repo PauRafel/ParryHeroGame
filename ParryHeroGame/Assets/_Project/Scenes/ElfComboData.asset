@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatGame.Data.ComboData
   owner: 0
   attacks:
-  - {fileID: 11400000, guid: 77877ab7d9013504899630a30c60f6df, type: 2}
-  - {fileID: 11400000, guid: 04fb7c31036b3f84ab04e0e6b1b50412, type: 2}
-  - {fileID: 11400000, guid: 6e30e30c041c89d47ac03ed3822daf88, type: 2}
-  - {fileID: 11400000, guid: 3c969312080601845af95bc45d86fe34, type: 2}
+  - {fileID: 11400000, guid: 4c6f097a616ab954aaf6177be9eba696, type: 2}
+  - {fileID: 11400000, guid: 720fb184086cc3a43afbc741ace63316, type: 2}
+  - {fileID: 11400000, guid: b3c002274b9dcf94c8d7e87ea156237c, type: 2}
+  - {fileID: 11400000, guid: c5b96e49cdc4656499f527aeef14cd15, type: 2}
   endOfComboPause: 2

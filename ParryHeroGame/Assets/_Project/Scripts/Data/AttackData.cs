@@ -30,6 +30,10 @@ namespace CombatGame.Data
         [Tooltip("Damage dealt to whoever fails to react correctly to this attack.")]
         public int damageOnFail = 1;
 
+        [Header("Pacing")]
+        [Tooltip("Pause (seconds) after this attack resolves, before the next attack in the combo begins.")]
+        public float pauseAfter = 1.0f;
+
         [Header("Animation")]
         [Tooltip("Trigger/state name in the Animator for this specific attack.")]
         public string animationTrigger;

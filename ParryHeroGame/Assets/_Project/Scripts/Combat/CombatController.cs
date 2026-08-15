@@ -9,6 +9,7 @@ namespace CombatGame.Combat
         [Header("Setup")]
         public EnemyData enemyData;
         public int heroMaxHealth = 10;
+        public float initialPause = 2.0f;
 
         [Header("Characters")]
         public CharacterAnimationController heroAnimation;
@@ -33,6 +34,8 @@ namespace CombatGame.Combat
         private IEnumerator CombatLoop()
         {
             Debug.Log("=== COMBAT START ===");
+
+            yield return new WaitForSeconds(initialPause);
 
             while (heroHealth > 0 && enemyHealth > 0)
             {
@@ -87,6 +90,8 @@ namespace CombatGame.Combat
                 ApplyResult(owner, attack, result);
 
                 if (heroHealth <= 0 || enemyHealth <= 0) yield break;
+
+                yield return new WaitForSeconds(attack.pauseAfter);
             }
 
             Debug.Log($"--- {owner} turn end, pause {combo.endOfComboPause}s ---");
