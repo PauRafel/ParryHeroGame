@@ -876,6 +876,7 @@ GameObject:
   - component: {fileID: 1582956132}
   - component: {fileID: 1582956131}
   - component: {fileID: 1582956133}
+  - component: {fileID: 1582956134}
   m_Layer: 0
   m_Name: Hero
   m_TagString: Untagged
@@ -991,6 +992,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7e10a3c3346fd640823d517ff63d4fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CombatGame.Combat.CharacterAnimationController
+--- !u!114 &1582956134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1582956129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd87d5f7cb8e6964f87131dfd278bf87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatGame.Combat.HeroBlockReactor
 --- !u!1 &1808582078
 GameObject:
   m_ObjectHideFlags: 0

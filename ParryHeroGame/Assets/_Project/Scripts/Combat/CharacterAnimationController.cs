@@ -2,10 +2,6 @@ using UnityEngine;
 
 namespace CombatGame.Combat
 {
-    /// <summary>
-    /// Bridges combat logic with the Animator. Works for both Hero and Enemy
-    /// as long as their Animator Controllers share the same parameter names.
-    /// </summary>
     [RequireComponent(typeof(Animator))]
     public class CharacterAnimationController : MonoBehaviour
     {
@@ -16,15 +12,15 @@ namespace CombatGame.Combat
         private static readonly int BlockTrigger = Animator.StringToHash("Block");
         private static readonly int IsBlockHolding = Animator.StringToHash("IsBlockHolding");
 
+        // Attack triggers are set by name (from AttackData.animationTrigger), so we track
+        // hashes we've seen to be able to reset them too.
+        private static readonly string[] KnownAttackTriggerNames = { "Attack1", "Attack2", "Attack3" };
+
         private void Awake()
         {
             animator = GetComponent<Animator>();
         }
 
-        /// <summary>
-        /// Plays an attack by its trigger name, e.g. "Attack1", "Attack2", "Attack3".
-        /// Trigger name comes directly from AttackData.animationTrigger.
-        /// </summary>
         public void PlayAttack(string triggerName)
         {
             if (string.IsNullOrEmpty(triggerName)) return;
@@ -48,6 +44,15 @@ namespace CombatGame.Combat
 
         public void PlayDeath()
         {
+            // Clear any other trigger that might still be armed (e.g. Hurt from the
+            // killing blow) so it can't fire from Any State right after Death plays.
+            animator.ResetTrigger(HurtTrigger);
+            animator.ResetTrigger(BlockTrigger);
+            foreach (string attackTrigger in KnownAttackTriggerNames)
+            {
+                animator.ResetTrigger(attackTrigger);
+            }
+
             animator.SetTrigger(DeathTrigger);
         }
     }

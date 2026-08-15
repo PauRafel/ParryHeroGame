@@ -6,8 +6,9 @@ namespace CombatGame.Combat
 {
     /// <summary>
     /// Resolves a single AttackData: plays the attacker's animation, waits the signal delay,
-    /// shows the signal, opens the input window, determines Perfect/Good/Miss,
-    /// and plays the defender's reaction animation.
+    /// shows the signal, opens the input window, and determines Perfect/Good/Miss.
+    /// The defender's base pose (e.g. Hero's BlockIdle) is driven independently in real time
+    /// by HeroBlockReactor - this class only overrides with Block (parry) or Hurt when relevant.
     /// </summary>
     public class AttackResolver : MonoBehaviour
     {
@@ -57,7 +58,7 @@ namespace CombatGame.Combat
             }
 
             signalUI.Hide();
-            PlayDefenderReaction(defender, listenForAttackButton, attack, result);
+            PlayDefenderReaction(defender, listenForAttackButton, result);
             onResult?.Invoke(result);
         }
 
@@ -84,23 +85,18 @@ namespace CombatGame.Combat
             if (!isHeld())
             {
                 signalUI.Hide();
-                PlayDefenderReaction(defender, listenForAttackButton, attack, HitResult.Miss);
+                PlayDefenderReaction(defender, listenForAttackButton, HitResult.Miss);
                 onResult?.Invoke(HitResult.Miss);
                 yield break;
             }
-
-            // Only the Hero holds a physical "block pose" - enemies don't block, so only
-            // set IsBlockHolding when the defender is reacting on the Block button.
-            if (!listenForAttackButton) defender.SetBlockHolding(true);
 
             float heldElapsed = 0f;
             while (heldElapsed < attack.holdDuration)
             {
                 if (!isHeld())
                 {
-                    if (!listenForAttackButton) defender.SetBlockHolding(false);
                     signalUI.Hide();
-                    PlayDefenderReaction(defender, listenForAttackButton, attack, HitResult.Miss);
+                    PlayDefenderReaction(defender, listenForAttackButton, HitResult.Miss);
                     onResult?.Invoke(HitResult.Miss);
                     yield break;
                 }
@@ -109,27 +105,25 @@ namespace CombatGame.Combat
                 yield return null;
             }
 
-            if (!listenForAttackButton) defender.SetBlockHolding(false);
             signalUI.Hide();
+            // Charged success: no animation override needed, BlockIdle is already
+            // playing naturally because the player is holding the button (driven by HeroBlockReactor).
             onResult?.Invoke(HitResult.Good);
         }
 
         /// <summary>
-        /// Plays the defender's reaction animation based on who attacked and the result.
-        /// - Enemy attacks, Hero defends: Perfect/Good -> Block (parry), Miss -> Hurt.
-        /// - Hero attacks, Enemy defends: Perfect/Good -> Hurt (hit landed), Miss -> nothing (attack whiffed).
+        /// Overrides the defender's free-response pose when the timing result matters:
+        /// - Enemy attacks, Hero defends: Miss -> Hurt. Perfect/Good (Simple only) -> Block (parry w/ effect).
+        /// - Hero attacks, Enemy defends: Perfect/Good -> Hurt (hit landed). Miss -> nothing (whiffed).
         /// </summary>
-        private void PlayDefenderReaction(CharacterAnimationController defender, bool attackerIsHero, AttackData attack, HitResult result)
+        private void PlayDefenderReaction(CharacterAnimationController defender, bool attackerIsHero, HitResult result)
         {
             if (attackerIsHero)
             {
-                // Enemy is defending against Hero's attack
                 if (result != HitResult.Miss) defender.PlayHurt();
-                // Miss: attack whiffed, enemy stays in Idle, no reaction needed
             }
             else
             {
-                // Hero is defending against Enemy's attack
                 if (result == HitResult.Miss) defender.PlayHurt();
                 else defender.PlayBlock();
             }
