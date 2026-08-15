@@ -18,6 +18,9 @@ namespace CombatGame.Combat
         [SerializeField] private int heroHealth;
         [SerializeField] private int enemyHealth;
 
+        [Header("Hero Attack Feedback")]
+        public MissTextUI missTextUI; 
+
         public AttackResolver resolver;
 
         private void Start()
@@ -59,19 +62,24 @@ namespace CombatGame.Combat
 
             Debug.Log($"--- {owner} turn start ({combo.attacks.Length} hits) ---");
 
-            CharacterAnimationController attackerAnim = owner == TurnOwner.Hero ? heroAnimation : enemyAnimation;
-            CharacterAnimationController defenderAnim = owner == TurnOwner.Hero ? enemyAnimation : heroAnimation;
-
             foreach (AttackData attack in combo.attacks)
             {
-                bool listenForAttackButton = owner == TurnOwner.Hero;
-
                 HitResult result = HitResult.Miss;
                 bool done = false;
 
-                IEnumerator routine = attack.signalType == SignalType.Simple
-                    ? resolver.ResolveSimple(attack, listenForAttackButton, attackerAnim, defenderAnim, r => { result = r; done = true; })
-                    : resolver.ResolveCharged(attack, listenForAttackButton, attackerAnim, defenderAnim, r => { result = r; done = true; });
+                IEnumerator routine;
+                if (owner == TurnOwner.Hero)
+                {
+                    routine = attack.signalType == SignalType.Simple
+                        ? resolver.ResolveHeroAttackSimple(attack, heroAnimation, enemyAnimation, r => { result = r; done = true; })
+                        : resolver.ResolveHeroAttackCombo(attack, heroAnimation, enemyAnimation, r => { result = r; done = true; });
+                }
+                else
+                {
+                    routine = attack.signalType == SignalType.Simple
+                        ? resolver.ResolveSimple(attack, false, enemyAnimation, heroAnimation, r => { result = r; done = true; })
+                        : resolver.ResolveCharged(attack, false, enemyAnimation, heroAnimation, r => { result = r; done = true; });
+                }
 
                 yield return StartCoroutine(routine);
                 while (!done) yield return null;
