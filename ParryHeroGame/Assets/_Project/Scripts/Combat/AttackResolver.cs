@@ -213,7 +213,10 @@ namespace CombatGame.Combat
             CharacterAnimationController attacker, CharacterAnimationController defender,
             System.Action<HitResult> onResult)
         {
-            attacker.PlayAttack(attack.animationTrigger);
+            // Play the attacker's full 3-hit combo sequence in the background while
+            // the defender's timing window is resolved in parallel.
+            string[] comboSequence = { "Attack1", "Attack2", "Attack3" };
+            Coroutine attackerRoutine = StartCoroutine(PlayAttackerComboSequence(attacker, comboSequence));
 
             yield return new WaitForSeconds(attack.signalDelay);
 
@@ -253,9 +256,15 @@ namespace CombatGame.Combat
             }
 
             signalUI.Hide();
-            // Charged success: no animation override needed, BlockIdle is already
-            // playing naturally because the player is holding the button (driven by HeroBlockReactor).
             onResult?.Invoke(HitResult.Good);
+        }
+
+        private IEnumerator PlayAttackerComboSequence(CharacterAnimationController attacker, string[] triggers)
+        {
+            foreach (string trigger in triggers)
+            {
+                yield return attacker.PlayAttackAndWait(trigger);
+            }
         }
 
         /// <summary>

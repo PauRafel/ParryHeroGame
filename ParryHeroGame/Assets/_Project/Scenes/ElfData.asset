@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e3518c8788bca134f94e05f05225b385, type: 3}
-  m_Name: NewEnemyData
+  m_Name: ElfData
   m_EditorClassIdentifier: Assembly-CSharp::CombatGame.Data.EnemyData
-  enemyName: 
-  portrait: {fileID: 0}
-  maxHealth: 5
+  enemyName: Elf
+  portrait: {fileID: 4723107735738678597, guid: ce0a8cad75f85134884d7b4a1b7020d3, type: 3}
+  maxHealth: 10
   possibleCombos:
   - {fileID: 11400000, guid: 3da5fd4b63e8da242b87211a85c99436, type: 2}
