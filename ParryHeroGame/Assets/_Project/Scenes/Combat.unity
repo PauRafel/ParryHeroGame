@@ -307,6 +307,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatGame.Combat.CombatController
   enemyData: {fileID: 11400000, guid: d7f59b03d678f3e4eb6549c225bd9ca5, type: 2}
   heroMaxHealth: 10
+  initialPause: 2
   heroAnimation: {fileID: 1582956133}
   enemyAnimation: {fileID: 1162203685}
   heroHealth: 0
@@ -1455,6 +1456,53 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd87d5f7cb8e6964f87131dfd278bf87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CombatGame.Combat.HeroBlockReactor
+--- !u!1 &1605187548
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1605187550}
+  - component: {fileID: 1605187549}
+  m_Layer: 0
+  m_Name: SceneIntro
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1605187549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1605187548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc6f4a4772700854984b6f3b135a5b6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatGame.Core.CombatSceneIntro
+  combatMusic: {fileID: 8300000, guid: b5667778e96e2444ca7b476476b9cafa, type: 3}
+  fadeInDuration: 2
+  musicFadeInDuration: 1
+--- !u!4 &1605187550
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1605187548}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.31154, y: -0.25825, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1808582078
 GameObject:
   m_ObjectHideFlags: 0
@@ -1734,3 +1782,4 @@ SceneRoots:
   - {fileID: 643823394}
   - {fileID: 247356535}
   - {fileID: 807459567}
+  - {fileID: 1605187550}
