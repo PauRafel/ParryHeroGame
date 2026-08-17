@@ -25,7 +25,7 @@ namespace CombatGame.Core
 
             if (canvasGroup != null)
             {
-                canvasGroup.alpha = 0f;
+                canvasGroup.alpha = 1.0f;
                 canvasGroup.blocksRaycasts = false;
             }
         }
